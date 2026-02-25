@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cliente</title>
+
+<style>
+body{margin:0;background:#000;font-family:Arial;color:#D4AF37}
+.logo{text-align:center;margin-top:30px}
+.logo img{width:220px}
+.linea{height:4px;background:#D4AF37;margin:25px 0}
+.container{padding:20px}
+select,button{
+width:100%;
+padding:18px;
+border-radius:15px;
+border:none;
+font-size:18px;
+margin-bottom:15px;
+}
+button{background:#c79c2c;color:black;font-weight:bold}
+.card{background:#111;padding:20px;border-radius:20px;margin-top:20px}
+</style>
+</head>
+<body>
+
+<div class="logo">
+<img src="logo.png">
+</div>
+<div class="linea"></div>
+
+<div class="container">
+
+<select id="mesa">
+<option value="">Seleccionar Mesa</option>
+<option>Mesa 1</option>
+<option>Mesa 2</option>
+<option>Mesa 3</option>
+<option>Mesa 4</option>
+<option>Mesa 5</option>
+<option>Mesa 6</option>
+<option>Mesa 7</option>
+<option>Mesa 8</option>
+<option>Mesa 9</option>
+<option>Mesa 10</option>
+</select>
+
+<button onclick="agregar('Muzzarella',5000)">Muzzarella $5000</button>
+<button onclick="agregar('Napolitana',5500)">Napolitana $5500</button>
+<button onclick="agregar('Cerveza 473',2000)">Cerveza 473 $2000</button>
+<button onclick="agregar('Coca 1.5L',2500)">Coca 1.5L $2500</button>
+
+<div class="card">
+<h3>Carrito</h3>
+<p id="lista"></p>
+<h3>Total: $<span id="total">0</span></h3>
+<button onclick="enviar()">Enviar Pedido</button>
+</div>
+
+</div>
+
+<script type="module">
+import { db } from "./firebase.js";
+import { collection, addDoc, serverTimestamp }
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+let carrito=[];
+let total=0;
+
+window.agregar=function(n,p){
+carrito.push(n);
+total+=p;
+document.getElementById("lista").innerText=carrito.join(", ");
+document.getElementById("total").innerText=total;
+}
+
+window.enviar=async function(){
+const mesa=document.getElementById("mesa").value;
+if(!mesa || carrito.length===0){alert("Completar datos");return;}
+
+await addDoc(collection(db,"pedidos"),{
+mesa,
+items:carrito,
+total,
+estado:"pendiente",
+fecha:serverTimestamp()
+});
+
+carrito=[];
+total=0;
+document.getElementById("lista").innerText="";
+document.getElementById("total").innerText="0";
+alert("Pedido enviado");
+}
+</script>
+
+</body>
+</html>
